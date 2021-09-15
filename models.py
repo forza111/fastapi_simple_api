@@ -26,4 +26,4 @@ class UserDetail(Base):
     full_name = Column(String)
     age = Column(Integer)
 
-    groups_id = Column(Integer, ForeignKey("groups.id"), nullable=True)
+    # groups_id = Column(Integer, ForeignKey("groups.id"), nullable=True)
