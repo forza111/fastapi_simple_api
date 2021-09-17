@@ -9,6 +9,7 @@ sqlalchemy = "*"
 alembic = "*"
 psycopg2 = "*"
 uvicorn = "*"
+importlib-resources = "*"
 
 [dev-packages]
 
