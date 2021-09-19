@@ -19,7 +19,7 @@ class UserDetail(Base):
     __tablename__ = "user_detail"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     user = relationship("User", backref=backref("user_detail", uselist=False))
 
     username = Column(String)

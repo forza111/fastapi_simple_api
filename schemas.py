@@ -3,21 +3,34 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-class User(BaseModel):
+class UserBase(BaseModel):
     email: str
+
+
+class UserCreate(UserBase):
     password: str
+
+
+class User(UserBase):
+    id: int
 
     class Config:
         orm_mode = True
 
 
 
-class UserDetail(BaseModel):
-    user_id: int
+class UserDetailBase(BaseModel):
     username: str
     full_name: str
     age: int
-    groups_id: int = None
+
+
+class UserDetailCreate(UserDetailBase):
+    pass
+
+
+class UserDetail(UserDetailBase):
+    user_id: int
 
     class Config:
         orm_mode = True
