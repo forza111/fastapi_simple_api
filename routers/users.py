@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from database import get_db
 import schemas
-# import crud
 import crud.users
+import dependencies
 
 
 router = APIRouter(
@@ -29,6 +32,24 @@ async def create_user_detail(user_id:int, user_detail: schemas.UserDetailCreate,
         raise HTTPException(status_code=400, detail="You can create user information only once")
     return crud.users.create_user_detail(db=db, user_detail=user_detail, user_id=user_id)
 
+
+@router.post("/token", response_model=schemas.Token)
+async def login_for_access_token(
+        db: Session = Depends(get_db),
+        form_data: dependencies.OAuth2PasswordRequestForm = Depends()
+):
+    user = crud.authenticate_user(db,form_data.email, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=dependencies.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = crud.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
 # ________________GET________________
 

@@ -3,6 +3,19 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
+# ________TOKEN_________
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+
+# ________USER_________
+
 class UserBase(BaseModel):
     email: str
 
@@ -18,6 +31,7 @@ class User(UserBase):
         orm_mode = True
 
 
+# ________USER_DETAIL_________
 
 class UserDetailBase(BaseModel):
     username: str

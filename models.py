@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 
@@ -12,6 +12,7 @@ class User(Base):
 
     email = Column(String, unique=True, index=True)
     password = Column(String)
+    disabled = Column(Boolean)
 
 
 
