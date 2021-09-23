@@ -2,13 +2,14 @@ import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 
 from database import engine, Base
-from routers import users
+from routers import users,authentication
 
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+app.include_router(authentication.router)
 app.include_router(users.router)
 
 

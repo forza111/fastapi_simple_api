@@ -13,6 +13,7 @@ importlib-resources = "*"
 passlib = "*"
 python-jose = "*"
 python-multipart = "*"
+email-validator = "*"
 
 [dev-packages]
 

@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
-
+from pydantic import BaseModel, EmailStr, validator
 
 # ________TOKEN_________
 
@@ -10,18 +9,20 @@ class Token(BaseModel):
     token_type: str
 
 
-class TokenData(BaseModel):
-    username: Optional[str] = None
-
-
 # ________USER_________
 
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
 
 
 class UserCreate(UserBase):
     password: str
+
+    @validator('password')
+    def password_validator(cls, v):
+        if len(v) < 6:
+            raise ValueError("Password length must be at least 6 characters")
+        return v
 
 
 class User(UserBase):
