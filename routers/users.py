@@ -8,11 +8,11 @@ import schemas
 import crud.users
 import dependencies
 
-
 router = APIRouter(
     prefix="/users",
     tags=["users"],
 )
+
 
 # ________________POST________________
 
@@ -26,7 +26,7 @@ async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/{user_id}/create_user_detail", response_model=schemas.UserDetail)
-async def create_user_detail(user_id:int, user_detail: schemas.UserDetailCreate, db: Session = Depends(get_db)):
+async def create_user_detail(user_id: int, user_detail: schemas.UserDetailCreate, db: Session = Depends(get_db)):
     db_user_detail = crud.users.get_user_detail(db, user_id=user_id)
     if db_user_detail:
         raise HTTPException(status_code=400, detail="You can create user information only once")
@@ -34,11 +34,9 @@ async def create_user_detail(user_id:int, user_detail: schemas.UserDetailCreate,
 
 
 @router.post("/token", response_model=schemas.Token)
-async def login_for_access_token(
-        db: Session = Depends(get_db),
-        form_data: dependencies.OAuth2PasswordRequestForm = Depends()
-):
-    user = crud.authenticate_user(db,form_data.email, form_data.password)
+async def login_for_access_token(db: Session = Depends(get_db),
+                                 form_data: dependencies.OAuth2PasswordRequestForm = Depends()):
+    user = crud.users.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,11 +44,15 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=dependencies.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = crud.create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+    access_token = crud.users.create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-# ________________GET________________
+
+# ________________GET_______________
 
 
+@router.get("/me", response_model=schemas.User)
+async def read_users_me(current_user: schemas.User = Depends(crud.users.get_current_user)):
+    return current_user

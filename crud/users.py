@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi import Depends, FastAPI, HTTPException, status
 from jose import JWTError, jwt
+import database
 
 import models, schemas
 import dependencies
@@ -20,16 +21,16 @@ def verify_password(plain_password, hashed_password):
 
 # ________________GET________________
 
-def authenticate_user(db, email: str, password: str):
+def authenticate_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
     return user
 
 
-async def get_current_user(db,token: str = Depends(dependencies.oauth2_scheme)):
+async def get_current_user(db: Session = Depends(database.get_db),token: str = Depends(dependencies.oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -40,19 +41,19 @@ async def get_current_user(db,token: str = Depends(dependencies.oauth2_scheme)):
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = schemas.TokenData(username=username)
+        token_data = username
     except JWTError:
         raise credentials_exception
-    user = get_user(db, username=token_data.username)
+    user = get_user_by_email(db,email=token_data)
     if user is None:
         raise credentials_exception
     return user
 
 
-async def get_current_active_user(current_user: schemas.User = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+# async def get_current_active_user(current_user: schemas.UserCreate = Depends(get_current_user)):
+#     if current_user.disabled:
+#         raise HTTPException(status_code=400, detail="Inactive user")
+#     return current_user
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
